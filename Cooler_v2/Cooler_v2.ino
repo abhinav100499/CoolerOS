@@ -65,7 +65,7 @@ void setRelay(bool state)
 // Timer functions
 void setTimer(int hours, int minutes) {
   int totalMinutes = hours * 60 + minutes;
-  if (totalMinutes < 1 || totalMinutes > 180) return; // 1 min to 3 hours max
+  if (totalMinutes < 1) return; // Minimum 1 minute, no upper limit
   
   activeTimer.active = true;
   activeTimer.startTime = millis();
