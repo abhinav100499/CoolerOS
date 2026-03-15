@@ -21,6 +21,9 @@
 - Relay Module (5V)
 - Button (optional for manual control)
 
+## UI
+
+
 ## Setup
 
 1. Install ESP32 board in Arduino IDE
