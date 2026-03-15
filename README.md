@@ -22,7 +22,7 @@
 - Button (optional for manual control)
 
 ## UI
-
+![coolerOS UI](./image/coolerOS.jpeg)
 
 ## Setup
 
