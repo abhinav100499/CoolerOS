@@ -928,7 +928,7 @@ void setupAP()
   Serial.print("AP Mode IP address: ");
   Serial.println(IP);
 
-  server.on("/",[](){
+  server.on("/",[IP](){
 
   server.send(200,"text/html",
   "<h2>🌡️ Cooler Controller Setup</h2>"
