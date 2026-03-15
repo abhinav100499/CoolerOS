@@ -969,9 +969,7 @@ void setup()
   setRelay(false);
 
   loadWiFi();
-  // Load schedules
-  loadSchedules();
-
+  
   if(ssid=="")
   {
     setupAP();
@@ -998,6 +996,9 @@ void setup()
   Serial.println("\nWiFi connected!");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+
+  // Load schedules only after successful WiFi connection
+  loadSchedules();
 
   if(MDNS.begin("cooler"))
   Serial.println("http://cooler.local");
