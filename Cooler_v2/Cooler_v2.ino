@@ -923,17 +923,29 @@ refresh()
 void setupAP()
 {
   WiFi.softAP("Cooler-Setup");
+  
+  IPAddress IP = WiFi.softAPIP();
+  Serial.print("AP Mode IP address: ");
+  Serial.println(IP);
 
   server.on("/",[](){
 
   server.send(200,"text/html",
-  "<h2>Setup WiFi</h2>"
+  "<h2>🌡️ Cooler Controller Setup</h2>"
+  "<h3>Option 1: Connect to WiFi</h3>"
   "<form action='/save'>"
-  "SSID:<input name='s'><br>"
-  "Password:<input name='p'><br>"
-  "<button>Save</button></form>");
+  "SSID:<input name='s' placeholder='Enter WiFi name'><br>"
+  "Password:<input name='p' placeholder='Enter WiFi password'><br>"
+  "<button>Connect to WiFi</button></form>"
+  "<hr>"
+  "<h3>Option 2: Use in AP Mode</h3>"
+  "<p>Current IP: " + IP.toString() + "</p>"
+  "<p><a href='/dashboard'>Access Cooler Control</a> (No WiFi needed)</p>"
+  "<p><small>Note: In AP mode, time/schedules may not work accurately without internet.</small></p>");
 
   });
+
+  server.on("/dashboard", handleDashboard);
 
   server.on("/save",[](){
 
@@ -968,8 +980,24 @@ void setup()
 
   WiFi.begin(ssid.c_str(),password.c_str());
 
-  while(WiFi.status()!=WL_CONNECTED)
-  delay(500);
+  // Try to connect for 15 seconds, then fallback to AP mode
+  Serial.println("Connecting to WiFi...");
+  int timeout = 0;
+  while(WiFi.status()!=WL_CONNECTED && timeout < 30) {  // 30 * 500ms = 15 seconds
+    delay(500);
+    timeout++;
+    Serial.print(".");
+  }
+  
+  if(WiFi.status()!=WL_CONNECTED) {
+    Serial.println("\nWiFi connection failed. Starting AP mode...");
+    setupAP();
+    return;
+  }
+  
+  Serial.println("\nWiFi connected!");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
 
   if(MDNS.begin("cooler"))
   Serial.println("http://cooler.local");
