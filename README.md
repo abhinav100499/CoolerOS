@@ -1,6 +1,5 @@
-# ESP32 Cooler Controller
-
-A smart cooler controller with scheduling, timer, and web interface.
+# CoolerOS
+**ESP32 Cooler Controller** A smart cooler controller with scheduling, timer, and web interface.
 
 ## Features
 
