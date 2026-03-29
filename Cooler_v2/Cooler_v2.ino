@@ -30,6 +30,10 @@ struct Timer {
 };
 Timer activeTimer = {false, 0, 0, 0, 0};
 
+// Manual override state
+bool manualOverride = false;
+unsigned long manualOnTime = 0;
+
 // Schedule variables
 #define MAX_SCHEDULES 10
 struct Schedule {
@@ -46,9 +50,13 @@ int scheduleCount = 0;
 
 void setRelay(bool state)
 {
-  // Priority: Manual control overrides everything
-  if (!state) {
-    // Manual OFF - cancel timer and ignore schedules
+  if (state) {
+    // Manual ON - set manual override with timestamp
+    manualOverride = true;
+    manualOnTime = millis();
+  } else {
+    // Manual OFF - always wins, cancels everything
+    manualOverride = false;
     if (activeTimer.active) {
       cancelTimer();
     }
@@ -59,7 +67,7 @@ void setRelay(bool state)
   digitalWrite(RELAY_PIN,(ACTIVE_LOW?!state:state));
 
   if(state)
-  coolerStartTime=millis();
+    coolerStartTime=millis();
 }
 
 // Timer functions
@@ -92,10 +100,17 @@ void checkTimer() {
   
   unsigned long elapsed = millis() - activeTimer.startTime;
   
-  // Check if timer has expired (avoid unsigned overflow)
+  // Check if timer has expired
   if (elapsed >= activeTimer.duration) {
-    // Timer expired - turn off cooler
-    setRelay(false);
+    // Timer expired - check if manual ON happened before timer expiry
+    if (manualOverride && manualOnTime < activeTimer.startTime) {
+      // Manual ON was before timer started - timer wins
+      setRelay(false);
+    } else if (!manualOverride) {
+      // No manual override - timer wins
+      setRelay(false);
+    }
+    // Always cancel timer
     cancelTimer();
   } else {
     // Update remaining time
@@ -261,7 +276,12 @@ bool toggleSchedule(String id, bool enabled) {
 
 void checkSchedule()
 {
-  // Priority: Manual > Timer > Schedule
+  // Priority: Manual OFF > Timer > Schedule
+  // If manual override is active, don't check schedules
+  if (manualOverride) {
+    return; // Skip schedule check during manual override
+  }
+  
   // If timer is active, don't check schedules
   if (activeTimer.active) {
     return;

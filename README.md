@@ -1,22 +1,35 @@
-# CoolerOS
-**ESP32 Cooler Controller** - A smart cooler controller with scheduling, timer, and web interface.
+# CoolerOS v2.1
+**ESP32 Cooler Controller** - A smart cooler controller with intelligent priority system, scheduling, timer, and web interface.
+
+## 🆕 v2.1 Latest Updates
+
+### **Enhanced Priority Logic**
+- **First-Come, First-Served**: Timer vs Manual ON respects whichever was activated first
+- **Manual Override**: Manual ON stays active until manual OFF (no time limits)
+- **Smart Timer Integration**: Timer respects manual control timing
+- **Schedule Protection**: Schedules completely ignored during manual override
+
+### **Bug Fixes**
+- ✅ **Fixed 30-second cycle issue**: Manual control no longer overridden by schedule checks
+- ✅ **Fixed timer conflicts**: Timer expiry now respects manual override timing
+- ✅ **Fixed schedule interference**: Manual control has absolute priority
 
 ## Features
 
-- **Manual Control**: ON/OFF buttons with absolute priority
-- **Timer System**: Unlimited hours with precise timing (0-60 minutes)
-- **Advanced Scheduling**: 
+- **🎯 Manual Control**: ON/OFF buttons with intelligent override system
+- **⏰ Timer System**: Unlimited hours with precise timing (0-60 minutes)
+- **📅 Advanced Scheduling**: 
   - Max 10 schedules
   - Multiselect days (MON-SUN)
   - Start/end time with overnight support
   - Enable/disable functionality
   - Edit/delete individual schedules
   - Visual indication for schedules not active today
-- **Priority System**: Manual > Timer > Schedule
-- **Color-coded UI**: Green (today), Blue (other days), Gray (disabled)
-- **Smart WiFi**: 15-second timeout with AP fallback for portable deployment
-- **Accurate Runtime**: Shows exact run time without resets
-- **Manual Override Protection**: Manual control respected until manual OFF
+- **🏆 Intelligent Priority System**: Manual OFF > (Timer vs Manual ON) > Schedule
+- **🎨 Color-coded UI**: Green (today), Blue (other days), Gray (disabled)
+- **📶 Smart WiFi**: 15-second timeout with AP fallback for portable deployment
+- **⏱️ Accurate Runtime**: Shows exact run time without resets
+- **🔒 Manual Override Protection**: Manual control respected until manual OFF
 
 ## Hardware
 
@@ -67,13 +80,23 @@
 }
 ```
 
-## Priority Logic
+## 🧠 Intelligent Priority Logic
 
-1. **Manual ON/OFF** - Highest priority (absolute control)
-2. **Timer Active** - Pauses schedules, expires on time
-3. **Schedules** - Time and day based (respects manual override)
+### **Priority Hierarchy**
+1. **🔴 Manual OFF** - Absolute priority, cancels timer and override
+2. **🟡 Timer vs Manual ON** - First-come, first-served:
+   - If Manual ON before Timer → Manual wins
+   - If Timer before Manual ON → Timer wins
+3. **🟢 Schedules** - Only active when no manual override or timer
 
-## Configuration
+### **Behavioral Examples**
+- **Manual ON → Timer**: Manual wins (stays ON until timer expires)
+- **Timer → Manual ON**: Manual wins (stays ON until manual OFF)
+- **Timer expires → Manual ON active**: Timer cancels, cooler stays ON
+- **Manual ON → Schedule starts**: Schedule ignored, cooler stays ON
+- **Manual OFF**: Always wins, cancels everything immediately
+
+## 🔧 Configuration
 
 - **Max Schedules**: 10
 - **Timer Max**: Unlimited hours
@@ -81,6 +104,8 @@
 - **WiFi**: Auto-connect with 15-second timeout + AP fallback
 - **Manual Override**: Until manual OFF (no time limit)
 - **Runtime Tracking**: Accurate to the second
+- **Schedule Check**: Every 30 seconds (respects manual override)
+- **Timer Check**: Every 1 second (precise countdown)
 
 ## Smart WiFi Features
 
@@ -90,14 +115,38 @@
 - **Dual Access**: Both WiFi setup and direct AP mode control
 - **No Stuck Device**: Always accessible via hotspot
 
-## Troubleshooting
+## 🛠️ Troubleshooting
 
-- **Manual Control Issues**: Check that manual override is working (no auto turn-offs)
-- **Timer Accuracy**: Timer expires exactly on time, no delays
-- **Runtime Display**: Shows accurate time from first ON, no resets
-- **WiFi Connection**: Try AP mode if WiFi unavailable
-- **Schedule Conflicts**: Manual control always overrides schedules
-- Check Serial Monitor for IP address
-- Verify WiFi credentials
-- Ensure relay connections
-- Reset ESP32 if needed
+### **v2.1 Common Issues**
+- **❌ Manual control turning off automatically**: 
+  - ✅ Fixed in v2.1 - Manual override prevents schedule interference
+- **⏰ Timer not respecting manual control**: 
+  - ✅ Fixed in v2.1 - First-come, first-served logic implemented
+- **📅 Schedules overriding manual ON**: 
+  - ✅ Fixed in v2.1 - Manual override completely blocks schedule checks
+
+### **General Troubleshooting**
+- **🔌 Hardware Issues**: 
+  - Check relay connections to pin 5
+  - Verify power supply stability
+  - Test relay module independently
+- **📶 Network Issues**: 
+  - Try AP mode if WiFi unavailable
+  - Check Serial Monitor for IP address
+  - Verify WiFi credentials
+  - Access via http://cooler.local if mDNS working
+- **⚡ Performance Issues**: 
+  - Reset ESP32 if unresponsive
+  - Check Serial Monitor for error messages
+  - Verify sufficient power supply
+- **🧹 Memory Issues**: 
+  - Reset device if web interface becomes slow
+  - Check schedule count (max 10)
+  - Clear schedules if needed via reset endpoint
+
+### **Debug Information**
+- **Schedule Check Interval**: 30 seconds
+- **Timer Check Interval**: 1 second  
+- **Manual Override Status**: Persistent until manual OFF
+- **Runtime Accuracy**: Millisecond precision
+- **Priority Status**: Manual OFF > (Timer vs Manual ON) > Schedule
